@@ -2,6 +2,16 @@ string_tools<public><final> := class<unique>:
     UppercaseAlphabet : string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     LowercaseAlphabet : string = "abcdefghijklmnopqrstuvwxyz"
 
+    UpperToLower : [char]char = map{}
+    LowerToUpper : [char]char = map{}
+
+    block: # Initialize the maps
+        for (i := 0..UppercaseAlphabet.Length - 1):
+            if (upperChar := UppercaseAlphabet[i]):
+                if (lowerChar := LowercaseAlphabet[i]):
+                    set UpperToLower[upperChar] = lowerChar
+                    set LowerToUpper[lowerChar] = upperChar
+
     # IndexOf(String : string, Char : char)
     # Finds the FIRST index of the specified char
     #
@@ -9,19 +19,16 @@ string_tools<public><final> := class<unique>:
     # Char = The char to find
     # Returns = The index found in integer form (-1 if nothing is found)
     IndexOf<public>(String : string, Char : char) : int =
-        var i : int = 0
-        loop:
-            if (i >= String.Length):
-                set i = -1
-                break
-
-            if (curChar : char = String[i]):
+        for (i := 0..String.Length - 1):
+            if (curChar := String[i]):
                 if (curChar = Char):
-                    break
+                    return i
+        return -1
 
-            set i = i + 1
-
-        return i
+        # alternative method (wrapper for []char.Find)
+        # if (i := String.Find(Char)):
+        #     return i
+        # return -1
 
     # LastIndexOf(String : string, Char : char)
     # Finds the LAST index of the specified char
@@ -30,19 +37,11 @@ string_tools<public><final> := class<unique>:
     # Char = The char to find
     # Returns = The index found in integer form (-1 if nothing is found)
     LastIndexOf<public>(String : string, Char : char) : int =
-        var i : int = String.Length - 1
-        loop:
-            if (i < 0):
-                set i = -1
-                break
-
-            if (curChar : char = String[i]):
+        for (i := String.Length - 1..0):
+            if (curChar := String[i]):
                 if (curChar = Char):
-                    break
-
-            set i = i - 1
-
-        return i
+                    return i
+        return -1
 
     # ToLowercase(String : string)
     # Makes the entire string lowercase.
@@ -52,32 +51,20 @@ string_tools<public><final> := class<unique>:
     ToLowercase<public>(String : string) : string =
         var finalString : string = ""
 
-        var i : int = 0
-        loop:
-            if (i >= String.Length):
-                break
-
-            if:
-                var chosenChar : char = String[i]
-
-                var j : int = 0
-                loop:
-                    if (j >= UppercaseAlphabet.Length):
-                        break
-
-                    if (upperChar : char = UppercaseAlphabet[j]):
-                        if (lowerChar : char = LowercaseAlphabet[j]):
-                            if (chosenChar = upperChar):
-                                set chosenChar = lowerChar
-                                break
-
-                    set j = j + 1
-
-                set finalString = "{finalString}{chosenChar}"
-
-            set i = i + 1
+        for (i := 0..String.Length - 1):
+            if (curChar := String[i]):
+                if (lowerChar := UpperToLower[curChar]):
+                    set curChar = lowerChar
+                set finalString = "{finalString}{curChar}"
 
         return finalString
+
+        # alternative method
+        # for (i := 0..String.Length - 1):
+        #     if (curChar := String[i]):
+        #         if (lowerChar := UppercaseAlphabet[IndexOf(LowercaseAlphabet, curChar)]):
+        #             set curChar = lowerChar
+        #         set finalString = "{finalString}{curChar}"
 
     # ToUppercase(String : string)
     # Makes the entire string uppercase.
@@ -87,30 +74,11 @@ string_tools<public><final> := class<unique>:
     ToUppercase<public>(String : string) : string =
         var finalString : string = ""
 
-        var i : int = 0
-        loop:
-            if (i >= String.Length):
-                break
-
-            if:
-                var chosenChar : char = String[i]
-
-                var j : int = 0
-                loop:
-                    if (j >= LowercaseAlphabet.Length):
-                        break
-
-                    if (upperChar : char = UppercaseAlphabet[j]):
-                        if (lowerChar : char = LowercaseAlphabet[j]):
-                            if (chosenChar = lowerChar):
-                                set chosenChar = upperChar
-                                break
-
-                    set j = j + 1
-
-                set finalString = "{finalString}{chosenChar}"
-
-            set i = i + 1
+        for (i := 0..String.Length - 1):
+            if (curChar := String[i]):
+                if (upperChar := LowerToUpper[curChar]):
+                    set curChar = upperChar
+                set finalString = "{finalString}{curChar}"
 
         return finalString
 
@@ -121,22 +89,5 @@ string_tools<public><final> := class<unique>:
     # Char = The char you want to remove
     # Returns = The same string without that char
     Trim<public>(String : string, Char : char) : string =
-        var finalString : string = ""
-
-        var i : int = 0
-        loop:
-            if (i >= String.Length):
-                break
-
-            if (curChar : char = String[i]):
-                var isChosenChar : logic = false
-
-                if (curChar = Char):
-                    set isChosenChar = true
-                
-                if (isChosenChar = false):
-                    set finalString = "{finalString}{curChar}"
-
-            set i = i + 1
-        
-        return finalString
+        # string is just a []char
+        return String.RemoveAllElements(Char)
